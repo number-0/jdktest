@@ -1,0 +1,198 @@
+/**
+ * The synchronization state.
+ 表示资源的可用状态，每次线程加锁state会加1，通过cas来操作state，初始值为0
+ state加锁的次数
+ 加锁会+1，释放锁会-1
+ */
+private volatile int state;
+
+
+/**
+ * The current owner of exclusive mode synchronization.
+初始值为null
+exclusiveOwnerThread加锁的线程
+ */
+private transient Thread exclusiveOwnerThread;
+
+当线程竞争资源的时候，会通过cas操作state，操作成功
+          state=1，exclusiveOwnerThread=当前线程
+
+可重入的时候是先检查exclusiveOwnerThread是否为当前线程，是，才cas操作state
+
+
+
+AbstractQueuedSynchronizer#Node：是为了定义双向链表队列
+
+CLH队列(同步队列)的变种：
+  没有竞争到锁的线程会放到队列中
+  每个节点就是一个Node
+  tail会指向最后一个Node
+
+
+
+/**
+由Node来构建CLH队列数据结构
+ */
+static final class Node {
+    //共享模式 （共享锁，比如读锁是可以共享的）
+    static final Node SHARED = new Node();
+    //独占模式 （独占锁，写锁）
+    static final Node EXCLUSIVE = null;
+
+    //节点状态：结束的状态，元素可以从队列里边被清除了，作废的节点
+    static final int CANCELLED =  1;
+    //节点状态：等待被唤醒的状态
+    static final int SIGNAL    = -1;
+    //节点状态：当前节点并不在同步队列中，而在条件队列中
+    static final int CONDITION = -2;
+    /**
+     * waitStatus value to indicate the next acquireShared should
+     * unconditionally propagate
+     */
+    static final int PROPAGATE = -3;
+
+    //记录当前节点状态
+    volatile int waitStatus;
+
+    //指针
+    volatile Node prev;
+
+    //指针
+    volatile Node next;
+
+    //记录当前节点关联的线程
+    volatile Thread thread;
+
+    /**
+     * Link to next node waiting on condition, or the special
+     * value SHARED.  Because condition queues are accessed only
+     * when holding in exclusive mode, we just need a simple
+     * linked queue to hold nodes while they are waiting on
+     * conditions. They are then transferred to the queue to
+     * re-acquire. And because conditions can only be exclusive,
+     * we save a field by using special value to indicate shared
+     * mode.
+     */
+    Node nextWaiter;
+
+    /**
+     * Returns true if node is waiting in shared mode.
+     */
+    final boolean isShared() {
+        return nextWaiter == SHARED;
+    }
+
+    /**
+     * Returns previous node, or throws NullPointerException if null.
+     * Use when predecessor cannot be null.  The null check could
+     * be elided, but is present to help the VM.
+     *
+     * @return the predecessor of this node
+     */
+    final Node predecessor() throws NullPointerException {
+        Node p = prev;
+        if (p == null)
+            throw new NullPointerException();
+        else
+            return p;
+    }
+
+    Node() {    // Used to establish initial head or SHARED marker
+    }
+
+    Node(Thread thread, Node mode) {     // Used by addWaiter
+        this.nextWaiter = mode;
+        this.thread = thread;
+    }
+
+    Node(Thread thread, int waitStatus) { // Used by Condition
+        this.waitStatus = waitStatus;
+        this.thread = thread;
+    }
+}
+
+
+
+ReentrantLock：
+
+ReentrantLock#FairSync#lock 加锁
+final void lock() {
+    acquire(1);
+}
+  AQS#acquire 加锁
+  public final void acquire(int arg) {
+      if (!tryAcquire(arg) &&
+          /*
+          Node node = addWaiter(Node.EXCLUSIVE)
+          acquireQueued(addWaiter(Node.EXCLUSIVE), arg))：入队操作
+          */
+          acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+          selfInterrupt();
+  }
+    ReentrantLock#FairSync#tryAcquire：尝试加锁
+    protected final boolean tryAcquire(int acquires) {
+        //当前线程
+        final Thread current = Thread.currentThread();
+        //获取state
+        int c = getState();
+        if (c == 0) {
+            //state=0
+            if (!hasQueuedPredecessors() && //队列中没有等待获取锁的节点存在
+                compareAndSetState(0, acquires)) { //cas
+                //exclusiveOwnerThread=当前线程
+                setExclusiveOwnerThread(current);
+                return true;
+            }
+        }
+        //可重入
+        else if (current == getExclusiveOwnerThread()) {
+            int nextc = c + acquires;
+            if (nextc < 0)
+                throw new Error("Maximum lock count exceeded");
+            //state加1
+            setState(nextc);
+            return true;
+        }
+        return false;
+    }
+    AQS#addWaiter
+    private Node addWaiter(Node mode) {
+        Node node = new Node(Thread.currentThread(), mode);
+        // Try the fast path of enq; backup to full enq on failure
+        Node pred = tail;
+        //队列中有元素
+        if (pred != null) {
+            //当前节点的prev指向之前的tail元素
+            node.prev = pred;
+            //cas，将tail指向当前节点
+            if (compareAndSetTail(pred, node)) {
+                //当前节点的next指向自己
+                pred.next = node;
+                return node;
+            }
+        }
+        //队列为空
+        enq(node);
+        return node;
+    }
+    AQS#enq：node为当前节点
+    private Node enq(final Node node) {
+        for (;;) {
+            Node t = tail;
+            if (t == null) { // Must initialize
+                //将head指向一个空的Node
+                if (compareAndSetHead(new Node()))
+                    //head和tail都指向这个空的Node
+                    tail = head;
+            } else {
+                //当前节点的prev指向空的节点
+                node.prev = t;
+                //将tail指向当前节点
+                if (compareAndSetTail(t, node)) {
+                    //空节点的next指向当前节点
+                    t.next = node;
+                    return t;
+                }
+            }
+        }
+    }
