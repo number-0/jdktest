@@ -1,5 +1,4 @@
 /**
- * The synchronization state.
  表示资源的可用状态，每次线程加锁state会加1，通过cas来操作state，初始值为0
  state加锁的次数
  加锁会+1，释放锁会-1
@@ -8,7 +7,6 @@ private volatile int state;
 
 
 /**
- * The current owner of exclusive mode synchronization.
 初始值为null
 exclusiveOwnerThread加锁的线程
  */
@@ -39,19 +37,16 @@ static final class Node {
     //独占模式 （独占锁，写锁）
     static final Node EXCLUSIVE = null;
 
-    //节点状态：结束的状态，元素可以从队列里边被清除了，作废的节点
+    //节点状态：结束状态，在同步队列中等待的线程等待超时或被中断，需要从同步队列中取消该Node的结点，其结点的waitStatus为CANCELLED，即结束状态，进入该状态后的结点将不会再变化。
     static final int CANCELLED =  1;
-    //节点状态：等待被唤醒的状态
+    //节点状态：等待被唤醒的状态，被标识为该等待唤醒状态的后继结点，当其前继结点的线程释放了同步锁或被取消，将会通知该后继结点的线程执行。说白了，就是处于唤醒状态，只要前继结点释放锁，就会通知标识为SIGNAL状态的后继结点的线程执行。
     static final int SIGNAL    = -1;
-    //节点状态：当前节点并不在同步队列中，而在条件队列中
+    //节点状态：与Condition相关，该标识的结点处于等待队列中，结点的线程等待在Condition上，当其他线程调用了Condition的signal()方法后，CONDITION状态的结点将从等待队列转移到同步队列中，等待获取同步锁。
     static final int CONDITION = -2;
-    /**
-     * waitStatus value to indicate the next acquireShared should
-     * unconditionally propagate
-     */
+    //与共享模式相关，在共享模式中，该状态标识结点的线程处于可运行状态。
     static final int PROPAGATE = -3;
 
-    //记录当前节点状态
+    //记录当前节点状态，waitStatus>0表示取消状态，而waitStatus<0表示有效状态，0代表初始化状态。
     volatile int waitStatus;
 
     //指针
@@ -171,7 +166,7 @@ final void lock() {
                 return node;
             }
         }
-        //队列为空
+        //入队逻辑
         enq(node);
         return node;
     }
@@ -179,12 +174,12 @@ final void lock() {
     private Node enq(final Node node) {
         for (;;) {
             Node t = tail;
-            if (t == null) { // Must initialize
+            if (t == null) { // 队列为空
                 //将head指向一个空的Node
                 if (compareAndSetHead(new Node()))
                     //head和tail都指向这个空的Node
                     tail = head;
-            } else {
+            } else { //队列不为空
                 //当前节点的prev指向空的节点
                 node.prev = t;
                 //将tail指向当前节点
@@ -196,3 +191,16 @@ final void lock() {
             }
         }
     }
+
+
+
+
+
+
+
+
+
+ReentrantLock：非公平锁
+
+
+
