@@ -204,6 +204,8 @@ public class MySkipList {
     public static void main(String[] args) {
         MySkipList mySkipList = new MySkipList();
         mySkipList.add(10);
+        mySkipList.add(20);
+        mySkipList.add(30);
         mySkipList.printSkipList();
     }
 }
