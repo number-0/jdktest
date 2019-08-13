@@ -103,7 +103,7 @@ public class MySkipList {
     /**
      * 整体逻辑：
      * （1）找到元素在最底层链表的附件位置，最底层链表插入元素(指针连接)
-     * （2）算法拔高，在当前层链表插入元素(指针连接)
+     * （2）算法拔高，在拔高的当前层链表插入元素(指针连接)
      * @param element
      */
     public void add(Integer element) {
@@ -120,7 +120,7 @@ public class MySkipList {
         nearNode.right = newNode; //新节点左边元素的右指针
         nearNode.right.left = newNode; //新节点右边元素的左指针
 
-        //随机算法拔高度
+        //随机算法拔高度，每次满足随机算法条件，则拔高一层
         int currentLevel = 1;
         while (random.nextDouble() < 0.5d) {
             if (currentLevel >= height) {
@@ -141,7 +141,7 @@ public class MySkipList {
                 tail = dummyTail;
             }
 
-            //up节点不为空为止，这样newNode的up节点才能将left指针有指向
+            //up节点不为空为止，这样newNode的up节点的left指针才能有指向
             while (nearNode.up == null) {
                 nearNode = nearNode.left;
             }
