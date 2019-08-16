@@ -44,7 +44,7 @@ public class ArrIndex {
      * 步骤2：indexFor(hash, table.length) JDK 1.8中实际上无该函数，但原理相同，即具备类似作用的函数
      */
     static int indexFor(int h, int length) {
-        return h & (length - 1); //本质就是取模运算，位运算比取模效率更高
+        return h & (length - 1); //本质就是取模运算，&比%效率更高
         // 将对哈希码扰动处理后的结果 与运算(&) （数组长度-1），最终得到存储在数组table的位置（即数组下标、索引）
     }
 
