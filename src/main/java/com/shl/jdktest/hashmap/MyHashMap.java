@@ -24,6 +24,23 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         this(defaultLength, defaultLoader);
     }
 
+    /**
+     * 整体逻辑：
+     * V put：
+     * （1）判断是否需要扩容，如果需要扩容，resize两倍，每个元素都要rehash，然后从新放入数组(相当于map.put执行一遍)
+     * （2）计算index = hash(key) % size，
+     *      如果index位置无元素了，则直接放入即可
+     *      如果index位置有元素，则判断key是否equals，
+     *              如果相等，则新value覆盖旧value
+     *              如果不相等，则index位置用新元素替代，next指针指向老的元素
+     * V get：
+     * （1）计算index = hash(key) % size
+     * （2）arr[index]获取值：
+     *      遍历链表，（key == key || key.equals(key) 返回value
+     * @param k
+     * @param v
+     * @return
+     */
     @Override
     public V put(K k, V v) {
 
@@ -105,6 +122,23 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         return index >= 0 ? index : -index;
     }
 
+    /**
+     * 整体逻辑：
+     * V put：
+     * （1）判断是否需要扩容，如果需要扩容，resize两倍，每个元素都要rehash，然后从新放入数组(相当于map.put执行一遍)
+     * （2）计算index = hash(key) % size，
+     *      如果index位置无元素了，则直接放入即可
+     *      如果index位置有元素，则判断key是否equals，
+     *              如果相等，则新value覆盖旧value
+     *              如果不相等，则index位置用新元素替代，next指针指向老的元素
+     * V get：
+     * （1）计算index = hash(key) % size
+     * （2）arr[index]获取值：
+     *      遍历链表，（key == key || key.equals(key) 返回value
+     * @param k
+     * @param v
+     * @return
+     */
     @Override
     public V get(K k) {
 
