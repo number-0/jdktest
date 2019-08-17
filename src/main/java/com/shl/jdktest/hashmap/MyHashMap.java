@@ -27,12 +27,13 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     /**
      * 整体逻辑：
      * V put：
-     * （1）判断是否需要扩容，如果需要扩容，resize两倍，每个元素都要rehash，然后从新放入数组(相当于map.put执行一遍)
+     *
      * （2）计算index = hash(key) % size，
      *      如果index位置无元素了，则直接放入即可
      *      如果index位置有元素，则判断key是否equals，
      *              如果相等，则新value覆盖旧value
      *              如果不相等，则index位置用新元素替代，next指针指向老的元素
+     * （1）判断是否需要扩容，如果需要扩容，resize两倍，每个元素都要rehash，然后从新放入数组(相当于map.put执行一遍)
      * V get：
      * （1）计算index = hash(key) % size
      * （2）arr[index]获取值：
@@ -43,12 +44,6 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
      */
     @Override
     public V put(K k, V v) {
-
-        //在这里要判断一下，size是否达到了一个扩容的一个标准
-        if (size >= defaultLength * defaultLoader) {
-            up2size();
-        }
-
         //1、   创建一个hash函数，根据key和hash函数算出数组下标
         int index = getIndex(k);
 
@@ -62,6 +57,12 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
             //如果index位置不为空，说明index位置有元素，那么就要进行一个替换，然后next指针指向老数据
             table[index] = newEntry(k, v, entry);
         }
+
+        //在这里要判断一下，size是否达到了一个扩容的一个标准
+        if (size > defaultLength * defaultLoader) {
+            up2size();
+        }
+
         return table[index].getValue();
     }
 
