@@ -40,10 +40,10 @@ public class ThreadLocal_CodeAnalysis {
 
     /**
      * setInitialValue()整体逻辑：
-     *  调用initialValue方法，获取初始化值【调用者通过覆盖该方法，设置自己的初始化值】
-     *  获取当前线程内部的ThreadLocalMap
-     *  map存在则把当前ThreadLocal和value添加到map中
-     *  map不存在则创建一个ThreadLocalMap，保存到当前线程内部
+     *  （1）调用initialValue方法，获取初始化值【调用者通过覆盖该方法，设置自己的初始化值】
+     *  （2）获取当前线程内部的ThreadLocalMap
+     *  （3）map存在则把当前ThreadLocal和value添加到map中
+     *  （4）map不存在则创建一个ThreadLocalMap，保存到当前线程内部
      * @return
      */
     private T setInitialValue() {
