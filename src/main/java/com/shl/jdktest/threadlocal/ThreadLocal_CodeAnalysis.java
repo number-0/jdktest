@@ -11,7 +11,6 @@ import java.lang.ref.WeakReference;
  */
 public class ThreadLocal_CodeAnalysis {
 
-
     // ************************* ThreadLocal ************************
 
     /**
