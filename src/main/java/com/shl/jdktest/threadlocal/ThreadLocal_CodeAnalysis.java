@@ -10,6 +10,10 @@ import java.lang.ref.WeakReference;
  * @date 2019/8/22
  */
 public class ThreadLocal_CodeAnalysis {
+
+
+    // ************************* ThreadLocal ************************
+
     /**
      * get()整体逻辑：
      * （1）获取当前线程内部的ThreadLocalMap
@@ -82,9 +86,13 @@ public class ThreadLocal_CodeAnalysis {
     public void remove() {
         ThreadLocalMap m = getMap(Thread.currentThread());
         if (m != null)
+            //ThreadLocalMap#remove
             m.remove(this);
     }
 
+
+
+    //start ************************* ThreadLocal#ThreadLocalMap ************************
 
     /**
      * ThreadLocalMap是一个自定义的hash map，专门用来保存线程的thread local变量
@@ -128,7 +136,52 @@ public class ThreadLocal_CodeAnalysis {
             size = 1;
             setThreshold(INITIAL_CAPACITY);
         }
+
+        private void set(ThreadLocal<?> key, Object value) {
+            ThreadLocal.ThreadLocalMap.Entry[] tab = table;
+            int len = tab.length;
+            int i = key.threadLocalHashCode & (len-1);
+
+            for (ThreadLocal.ThreadLocalMap.Entry e = tab[i];
+                    e != null;
+                    e = tab[i = nextIndex(i, len)]) {
+                ThreadLocal<?> k = e.get();
+
+                if (k == key) {
+                    e.value = value;
+                    return;
+                }
+
+                if (k == null) {
+                    replaceStaleEntry(key, value, i);
+                    return;
+                }
+            }
+
+            tab[i] = new ThreadLocal.ThreadLocalMap.Entry(key, value);
+            int sz = ++size;
+            if (!cleanSomeSlots(i, sz) && sz >= threshold)
+                rehash();
+        }
+
+        /**
+         * Remove the entry for key.
+         */
+        private void remove(ThreadLocal<?> key) {
+            ThreadLocal.ThreadLocalMap.Entry[] tab = table;
+            int len = tab.length;
+            int i = key.threadLocalHashCode & (len-1);
+            for (ThreadLocal.ThreadLocalMap.Entry e = tab[i];
+                    e != null;
+                    e = tab[i = nextIndex(i, len)]) {
+                if (e.get() == key) {
+                    e.clear();
+                    expungeStaleEntry(i);
+                    return;
+                }
+            }
+        }
     }
 
-
+    //end ************************* ThreadLocal#ThreadLocalMap ************************
 }
