@@ -40,5 +40,5 @@ public class MyRateLimiter {
         }, period, period);
     }
 
-    //todo Semaphore#acquire() 获取令牌
+    //todo 获取令牌 Semaphore#acquire()：从此信号量获取一个许可，在提供一个许可前一直将线程阻塞，否则线程被中断，可用的许可数减1
 }
