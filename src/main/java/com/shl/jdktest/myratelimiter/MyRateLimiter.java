@@ -7,6 +7,9 @@ import java.util.concurrent.Semaphore;
 /**
  * 限流：令牌桶算法实现
  *
+ * 令牌桶算法关键点：计数、定时器(每隔200ms放)，间隔(200ms)
+ * 计数可以用Semaphore来实现，Semaphore可增可减
+ * 定时器可以用Timer
  * @author songhengliang
  * @date 2019/5/28
  */
@@ -28,22 +31,14 @@ public class MyRateLimiter {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                //Semaphore#availablePermits()：获取可用的许可数，此方法一般用于调试
                 if (sem.availablePermits() < limit) {
+                    //Semaphore#release()：释放一个许可，将其返回给信号量，许可数增加1
                     sem.release();
                 }
             }
         }, period, period);
     }
 
-    public void acuqire() throws InterruptedException {
-        this.sem.acquire();
-    }
-
-    public boolean tryAcquire() {
-        return this.sem.tryAcquire();
-    }
-
-    public int availablePermits() {
-        return this.sem.availablePermits();
-    }
+    //todo Semaphore#acquire() 获取令牌
 }
