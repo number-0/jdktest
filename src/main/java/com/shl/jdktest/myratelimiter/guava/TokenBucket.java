@@ -16,10 +16,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TokenBucket {
 
+    /**
+     * 流水号
+     */
     private AtomicInteger phoneNumbers = new AtomicInteger(0);
 
     private final static int LIMIT = 100;
 
+    /**
+     * 1秒钟允许10个操作，100ms处理一个操作
+     */
     private RateLimiter rateLimiter = RateLimiter.create(10);
 
     private final int saleLimit;
