@@ -13,8 +13,6 @@ import java.util.function.Consumer;
  * @date 2019/8/24
  */
 public class LeakyBucket {
-
-
     /**
      * 定义漏桶
      */
@@ -26,7 +24,7 @@ public class LeakyBucket {
     private static final int BUCKET_LIMIT = 1000;
 
     /**
-     * 1秒钟允许10个操作
+     * 1秒钟允许10个操作，100ms处理一个操作
      */
     private final RateLimiter limiter = RateLimiter.create(10d);
 
@@ -43,7 +41,7 @@ public class LeakyBucket {
     private final Monitor pollMonitor = new Monitor();
 
     /**
-     * 往桶里面写数据，即提交请求
+     * 往桶里面写数据，即提交请求，桶里最多放1000
      */
     public void submit(Integer data) {
         if (offerMonitor.enterIf(offerMonitor.newGuard(() -> container.size() < BUCKET_LIMIT))) {
