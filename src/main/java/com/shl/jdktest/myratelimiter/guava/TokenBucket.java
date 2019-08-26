@@ -19,7 +19,7 @@ public class TokenBucket {
     /**
      * 流水号
      */
-    private AtomicInteger phoneNumbers = new AtomicInteger(0);
+    private AtomicInteger serialNumber = new AtomicInteger(0);
 
     private final static int LIMIT = 100;
 
@@ -42,11 +42,11 @@ public class TokenBucket {
         Stopwatch started = Stopwatch.createStarted();
         boolean success = rateLimiter.tryAcquire(10, TimeUnit.SECONDS);
         if (success) {
-            if (phoneNumbers.get() >= saleLimit) {
+            if (serialNumber.get() >= saleLimit) {
                 throw new IllegalStateException(
                         "Not any phone can be sale, please wait to next time.");
             }
-            int phoneNo = phoneNumbers.getAndIncrement();
+            int phoneNo = serialNumber.getAndIncrement();
             handleOrder();
             System.out.println(
                     Thread.currentThread() + " user get the Mi phone: " + phoneNo + ",ELT:" + started
@@ -58,6 +58,9 @@ public class TokenBucket {
         }
     }
 
+    /**
+     * 模拟处理订单的流程
+     */
     private void handleOrder() {
         try {
             TimeUnit.SECONDS.sleep(ThreadLocalRandom.current().nextInt(10));
