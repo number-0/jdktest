@@ -36,8 +36,6 @@ public class LeakyBucket {
     /**
      * 从桶里消费数据时，桶里必须存在数据
      */
-    private final Monitor consumerMonitor = new Monitor();
-
     private final Monitor pollMonitor = new Monitor();
 
     /**
