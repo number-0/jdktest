@@ -15,7 +15,7 @@ public class RateLimiterDemo {
      * RateLimiter#create(double permitsPerSecond)：每秒钟允许多少个许可
      * 0.5：1秒钟允许有0.5个许可，那就是2秒钟获取1个许可
      *
-     * RateLimiter#acquire()：匀速获取许可，会阻塞再没有到达获取时间的时候，因为是匀速
+     * RateLimiter#acquire()：从RateLimiter获取一个许可，该方法会被阻塞直到获取到请求
      */
     private static final RateLimiter RATE_LIMITER = RateLimiter.create(0.5);
 

@@ -54,6 +54,7 @@ public class TokenBucket {
             return phoneNo;
         } else {
             started.stop();
+            //超时后 同一时间，很大的流量来强时，超时快速失败。
             throw new RuntimeException("Sorry, occur exception when buy phone");
         }
     }

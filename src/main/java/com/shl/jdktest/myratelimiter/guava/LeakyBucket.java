@@ -13,6 +13,7 @@ import java.util.function.Consumer;
  * @date 2019/8/24
  */
 public class LeakyBucket {
+
     /**
      * 定义漏桶
      */
@@ -71,7 +72,16 @@ public class LeakyBucket {
             } finally {
                 pollMonitor.leave();
             }
+        } else {
+            //当木桶的消费完后，可以消费那些降级存入MQ或者DB里面的数据
+            System.out.println("will consumer Data from MQ...");
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
 }
