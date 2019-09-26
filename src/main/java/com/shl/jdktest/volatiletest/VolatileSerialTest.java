@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * 观察如下代码，只看代码，发现永远都不会出现"a=1和b=1"，
  *
- * 加上volatile可以保证有序性
+ * 加上volatile可以保证有序性，volatile是通过内存屏障实现的
  * @author songhengliang
  * @date 2019/9/4
  */
@@ -32,6 +32,7 @@ public class VolatileSerialTest {
             Thread one = new Thread(new Runnable(){
                 @Override
                 public void run() {
+                    //重排序只要求最终的一致性
                     int a = y; //4
                     x = 1; //1
                     resultMap.put("a", a);
