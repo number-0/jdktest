@@ -33,11 +33,30 @@ public class ThreadPool_CodeAnalysis {
             threadPool.execute(new MyTask(i, "任务"+i));
         }
 
+
+//        adjustArgs();
+
         try {
             Thread.sleep(Integer.MAX_VALUE);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void adjustArgs() {
+        int corePoolSize = threadPool.getCorePoolSize();
+        int maximumPoolSize = threadPool.getMaximumPoolSize();
+        long keepAliveTime = threadPool.getKeepAliveTime(TimeUnit.SECONDS);
+        System.out.println("before adjust, corePoolSize:"+corePoolSize + ", maximumPoolSize:" + maximumPoolSize + ", keepAliveTime:" + keepAliveTime);
+
+        threadPool.setCorePoolSize(20);
+        threadPool.setMaximumPoolSize(30);
+        threadPool.setKeepAliveTime(10, TimeUnit.SECONDS);
+
+        corePoolSize = threadPool.getCorePoolSize();
+        maximumPoolSize = threadPool.getMaximumPoolSize();
+        keepAliveTime = threadPool.getKeepAliveTime(TimeUnit.SECONDS);
+        System.out.println("after adjust, corePoolSize:" + corePoolSize + ", maximumPoolSize:" + maximumPoolSize + ", keepAliveTime:" + keepAliveTime);
     }
 
 
